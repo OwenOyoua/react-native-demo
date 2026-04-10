@@ -54,7 +54,11 @@ function Navigation({ navigation }: NavigationProps) {
                 title="🔧 UI 4 - Avanc\u00e9 & Sp\u00e9cifiques"
                 onPress={() => navigation.navigate('UI4')}
             /> 
-        </ScrollView>
+            <Text style={styles.sectionTitle}>Médias</Text>
+            <Button 
+                title="🎬 Médias - Images, Vidéos & Audio"
+                onPress={() => navigation.navigate('Medias')}
+            />        </ScrollView>
     );
 }   
 

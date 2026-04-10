@@ -11,6 +11,7 @@ import UI1 from './components/ui1';
 import UI2 from './components/ui2';
 import UI3 from './components/ui3';
 import UI4 from './components/ui4';
+import Medias from './components/medias';
 
 
 // 3. Créer le Stack avec la liste de paramètres typée
@@ -64,6 +65,11 @@ const Stack = createNativeStackNavigator();
           name="UI4" 
           component={UI4} 
           options={{ title: 'Avancé & Spécifiques' }}
+        />
+        <Stack.Screen 
+          name="Medias" 
+          component={Medias} 
+          options={{ title: 'Gestion des Médias' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
