@@ -51,7 +51,7 @@ function Navigation({ navigation }: NavigationProps) {
                 onPress={() => navigation.navigate('UI3')}
             /> 
             <Button 
-                title="🔧 UI 4 - Avanc\u00e9 & Sp\u00e9cifiques"
+                title="🔧 UI 4 - Avancés & Animations"
                 onPress={() => navigation.navigate('UI4')}
             /> 
             <Text style={styles.sectionTitle}>Médias</Text>

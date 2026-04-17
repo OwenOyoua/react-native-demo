@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,18 @@ import {
   Image,
   Pressable,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
+import Sound from 'react-native-sound';
+// @ts-ignore
+import Video from 'react-native-video';
 
 const Medias = () => {
   const [loadingOnlineImage, setLoadingOnlineImage] = useState(true);
+
+  // Références des fichiers audio et vidéo
+  const localAudioRef = useRef<Sound | null>(null);
+  const onlineAudioRef = useRef<Sound | null>(null);
 
   // URLs des médias en ligne
   const onlineImageURL =
@@ -20,6 +28,78 @@ const Medias = () => {
     'https://commondatastorage.googleapis.com/gtv-videos-library/sample/big_buck_bunny.mp4';
   const onlineAudioURL =
     'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+
+  // Fonction pour charger et jouer un fichier audio
+  const playAudio = (isLocal: boolean) => {
+    try {
+      const audioRef = isLocal ? localAudioRef : onlineAudioRef;
+      const fileName = isLocal ? '../assets/audios/26keuss.mp3' : onlineAudioURL;
+
+      if (audioRef.current) {
+        audioRef.current.stop(() => {
+          audioRef.current?.release();
+        });
+      }
+
+      audioRef.current = new Sound(
+        fileName,
+        isLocal ? Sound.MAIN_BUNDLE : '',
+        (_error) => {
+          if (_error) {
+            Alert.alert(
+              'Erreur',
+              `Impossible de charger le fichier audio: ${_error.message}`,
+            );
+            return;
+          }
+          audioRef.current?.play((success) => {
+            if (success) {
+              // Audio en lecture
+            } else {
+              Alert.alert('Erreur', 'Erreur lors de la lecture de l\'audio');
+            }
+          });
+        },
+      );
+    } catch {
+      Alert.alert('Erreur', 'Erreur lors de la lecture');
+    }
+  };
+
+  const pauseAudio = (isLocal: boolean) => {
+    const audioRef = isLocal ? localAudioRef : onlineAudioRef;
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  };
+
+  const stopAudio = (isLocal: boolean) => {
+    const audioRef = isLocal ? localAudioRef : onlineAudioRef;
+    if (audioRef.current) {
+      audioRef.current.stop(() => {
+        audioRef.current?.release();
+      });
+    }
+  };
+
+  // Nettoyer les ressources audio quand le composant se démonte
+  React.useEffect(() => {
+    const localRef = localAudioRef.current;
+    const onlineRef = onlineAudioRef.current;
+    
+    return () => {
+      if (localRef) {
+        localRef.stop(() => {
+          localRef.release();
+        });
+      }
+      if (onlineRef) {
+        onlineRef.stop(() => {
+          onlineRef.release();
+        });
+      }
+    };
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -108,14 +188,13 @@ const Medias = () => {
               Les vidéos locales sont intégrées au projet. Vidéos disponibles:
               26keuss.mp4 et demo-admin.mp4
             </Text>
-            <View style={styles.placeholderContainer}>
-              <View style={styles.videoPlaceholder}>
-                <Text style={styles.placeholderIcon}>🎬</Text>
-                <Text style={styles.placeholderText}>26keuss.mp4</Text>
-                <Text style={styles.placeholderSubtext}>
-                  Vidéo locale depuis assets/videos
-                </Text>
-              </View>
+            <View style={styles.mediaContainer}>
+              <Video
+                source={require('../assets/videos/26keuss.mp4')}
+                style={styles.video}
+                controls={true}
+                resizeMode="contain"
+              />
             </View>
             <View style={styles.codeBlock}>
               <Text style={styles.codeText}>
@@ -130,7 +209,7 @@ const Medias = () => {
             </View>
             <Pressable style={styles.installButton}>
               <Text style={styles.installButtonText}>
-                📦 npm install react-native-video
+                ✅ react-native-video installé
               </Text>
             </Pressable>
           </View>
@@ -144,14 +223,13 @@ const Medias = () => {
             <Text style={styles.description}>
               Deuxième vidéo locale disponible: demo-admin.mp4
             </Text>
-            <View style={styles.placeholderContainer}>
-              <View style={styles.videoPlaceholder}>
-                <Text style={styles.placeholderIcon}>🎬</Text>
-                <Text style={styles.placeholderText}>demo-admin.mp4</Text>
-                <Text style={styles.placeholderSubtext}>
-                  Vidéo locale depuis assets/videos
-                </Text>
-              </View>
+            <View style={styles.mediaContainer}>
+              <Video
+                source={require('../assets/videos/demo-admin.mp4')}
+                style={styles.video}
+                controls={true}
+                resizeMode="contain"
+              />
             </View>
             <View style={styles.codeBlock}>
               <Text style={styles.codeText}>
@@ -174,12 +252,13 @@ const Medias = () => {
               Streamé depuis Internet. Idéal pour les plateformes comme YouTube,
               Vimeo ou serveurs personnalisés.
             </Text>
-            <View style={styles.placeholderContainer}>
-              <View style={styles.videoPlaceholder}>
-                <Text style={styles.placeholderIcon}>🌐</Text>
-                <Text style={styles.placeholderText}>Video URL</Text>
-                <Text style={styles.placeholderSubtext}>{onlineVideoURL}</Text>
-              </View>
+            <View style={styles.mediaContainer}>
+              <Video
+                source={{ uri: onlineVideoURL }}
+                style={styles.video}
+                controls={true}
+                resizeMode="contain"
+              />
             </View>
             <View style={styles.codeBlock}>
               <Text style={styles.codeText}>
@@ -216,13 +295,22 @@ const Medias = () => {
               <Text style={styles.audioTitle}>🎵 26keuss.mp3</Text>
               <Text style={styles.audioSubtitle}>Fichier audio local</Text>
               <View style={styles.audioControls}>
-                <Pressable style={styles.audioButton}>
+                <Pressable 
+                  style={styles.audioButton}
+                  onPress={() => playAudio(true)}
+                >
                   <Text style={styles.audioButtonText}>▶️ Play</Text>
                 </Pressable>
-                <Pressable style={styles.audioButton}>
+                <Pressable 
+                  style={styles.audioButton}
+                  onPress={() => pauseAudio(true)}
+                >
                   <Text style={styles.audioButtonText}>⏸️ Pause</Text>
                 </Pressable>
-                <Pressable style={styles.audioButton}>
+                <Pressable 
+                  style={styles.audioButton}
+                  onPress={() => stopAudio(true)}
+                >
                   <Text style={styles.audioButtonText}>⏹️ Stop</Text>
                 </Pressable>
               </View>
@@ -261,13 +349,22 @@ const Medias = () => {
               <Text style={styles.audioTitle}>🎙️ Podcast / Musique</Text>
               <Text style={styles.audioSubtitle}>{onlineAudioURL}</Text>
               <View style={styles.audioControls}>
-                <Pressable style={styles.audioButton}>
+                <Pressable 
+                  style={styles.audioButton}
+                  onPress={() => playAudio(false)}
+                >
                   <Text style={styles.audioButtonText}>▶️ Play</Text>
                 </Pressable>
-                <Pressable style={styles.audioButton}>
+                <Pressable 
+                  style={styles.audioButton}
+                  onPress={() => pauseAudio(false)}
+                >
                   <Text style={styles.audioButtonText}>⏸️ Pause</Text>
                 </Pressable>
-                <Pressable style={styles.audioButton}>
+                <Pressable 
+                  style={styles.audioButton}
+                  onPress={() => stopAudio(false)}
+                >
                   <Text style={styles.audioButtonText}>⏹️ Stop</Text>
                 </Pressable>
               </View>
@@ -398,6 +495,12 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 8,
     resizeMode: 'contain',
+  },
+  video: {
+    width: '100%',
+    height: 220,
+    backgroundColor: '#000',
+    borderRadius: 8,
   },
   loaderContainer: {
     height: 120,
