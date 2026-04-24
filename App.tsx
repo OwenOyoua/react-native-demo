@@ -12,6 +12,8 @@ import UI2 from './components/ui2';
 import UI3 from './components/ui3';
 import UI4 from './components/ui4';
 import Medias from './components/medias';
+import { Weather } from './components/Weather';
+import { MoviesApi } from './components/MoviesApi';
 
 
 // 3. Créer le Stack avec la liste de paramètres typée
@@ -70,6 +72,17 @@ const Stack = createNativeStackNavigator();
           name="Medias" 
           component={Medias} 
           options={{ title: 'Gestion des Médias' }}
+        />
+        <Stack.Screen
+          name="Weather"
+          component={Weather}
+          options={{ title: 'Météo' }}
+        />
+
+          <Stack.Screen
+          name="MoviesApi"
+          component={MoviesApi}
+          options={{ title: 'Films & Séries' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

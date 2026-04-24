@@ -58,7 +58,19 @@ function Navigation({ navigation }: NavigationProps) {
             <Button 
                 title="🎬 Médias - Images, Vidéos & Audio"
                 onPress={() => navigation.navigate('Medias')}
-            />        </ScrollView>
+            />     
+
+            <Text style={styles.sectionTitle}>API & Données</Text>
+            <Button
+                title="☁️ Météo - API OpenWeather"
+                onPress={() => navigation.navigate('Weather')}
+            />   
+            <Button
+                title="🎬 Films & Séries - API OMDB"
+                onPress={() => navigation.navigate('MoviesApi')}
+            />
+
+            </ScrollView>
     );
 }   
 
